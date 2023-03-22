@@ -23,7 +23,7 @@ def define_argparser():
 
     config = p.parse_args()
 
-    return   
+    return config   
 
 
 def read_text():
@@ -40,6 +40,7 @@ def read_text():
 
 
 def main(config):
+    
     saved_data = torch.load( # 저장된 모델을 불러옴
         config.model_fn,
         map_location='cpu' if config.gpu_id < 0 else 'cuda:%d' % config.gpu_id # 원하는 디바이스에 로딩되도록록
@@ -110,4 +111,5 @@ def main(config):
 
 if __name__ == '__main__':
     config = define_argparser()
+    
     main(config)
