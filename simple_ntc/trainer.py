@@ -9,6 +9,8 @@ from ignite.engine import Events
 from ignite.metrics import RunningAverage
 from ignite.contrib.handlers.tqdm_logger import ProgressBar
 
+import sys
+sys.path.append('/content/drive/MyDrive/인공지능/텍스트분류')
 from simple_ntc.utils import get_grad_norm, get_parameter_norm
 
 VERBOSE_SILENT = 0
@@ -100,7 +102,7 @@ class MyEngine(Engine):
         # Attaching would be repaeted for serveral metrics.
         # Thus, we can reduce the repeated codes by using this function.
         def attach_running_average(engine, metric_name):
-            RunningAverage(output_transform=lambda x: x[metric_name]).attach(
+            RunningAverage(output_transform=lambda x: x[metric_name]).attach( # engine에 해당 metric_name으로 attach한다.
                 engine,
                 metric_name,
             )
@@ -113,11 +115,12 @@ class MyEngine(Engine):
         # If the verbosity is set, progress bar would be shown for mini-batch iterations.
         # Without ignite, you can use tqdm to implement progress bar.
         if verbose >= VERBOSE_BATCH_WISE:
-            pbar = ProgressBar(bar_format=None, ncols=120)
+            pbar = ProgressBar(bar_format=None, ncols=120) # 프로그래스바 attach
             pbar.attach(train_engine, training_metric_names)
 
         # If the verbosity is set, statistics would be shown after each epoch.
-        if verbose >= VERBOSE_EPOCH_WISE:
+        # train engine에 epoch가 끝났을때 train_engin에 등록해서 print_train_logs()를 실행해서 해당하는 최종값을 받아와라라
+        if verbose >= VERBOSE_EPOCH_WISE: 
             @train_engine.on(Events.EPOCH_COMPLETED)
             def print_train_logs(engine):
                 print('Epoch {} - |param|={:.2e} |g_param|={:.2e} loss={:.4e} accuracy={:.4f}'.format(
@@ -128,6 +131,7 @@ class MyEngine(Engine):
                     engine.state.metrics['accuracy'],
                 ))
 
+        # validation도 마찬가지로
         validation_metric_names = ['loss', 'accuracy']
         
         for metric_name in validation_metric_names:
